@@ -4,10 +4,10 @@ from symtable import Class
 from tokenize import String
 
 import math
+from xml.dom import ValidationErr
 
 
 class InputsService:
-
 
     def input_prefix(self):
         while True:
@@ -23,6 +23,7 @@ class InputsService:
                 print("\nPlease enter '8' or '16' or '24'.")
 
     def input_Prefix24(self):
+        max24: int = 128
 
         while True:
             response = input("\n❔(/24) Do you want to set the IP your self?  (y/n): ").lower().strip()
@@ -33,9 +34,17 @@ class InputsService:
                 basicnetwork = "192.168.4.0"
                 break
             else:
-                response in ("🔄Please enter 'y' or 'n'")
+                print("🔄Please enter 'y' or 'n'")
 
-        subnetwork = int(input("❔How many Networks should be created: "))
+        while True:
+            try:
+                subnetwork = int(input("❔How many Networks should be created: "))
+                if subnetwork > max24:
+                    print("\nThe max is 128.")
+                    continue
+                break
+            except ValueError:
+                print("\nPlease enter a number between 0 and 255.")
 
         self.calculator = Calculator()
 
@@ -49,16 +58,24 @@ class OutputsService:
         print(f"✅New Subnetmasks: {subnetzmaske}")
         for index, adresse in enumerate(netzadressen, start=1):
             print(f"\n{index}. Network: {adresse}")
+        if hostanzahl <= 0:
+            print("\n⚠️ There are 0 Host possible.")
+
 
 
 class Calculator:
     def calculate24(self, subnetwork: int):
         # 1. Nächsthöhere 2er-Potenz aus der Anzahl der benötigten Subnetze
+
+        #new
+        #subnetwork = subnetwork - 2
+
+        #old
         bit = math.ceil(math.log2(subnetwork))
 
         # 2. Anzahl möglicher Hosts je Netz (Netzgröße minus Netz- und Broadcast-Adresse)
         netzgroesse = 2 ** (8 - bit)
-        hostanzahl = netzgroesse - 2
+        hostanzahl = netzgroesse -2
 
         # 3. Neue Subnetzmaske aus den genutzten Bits
         letztes_oktett_maske = 256 - netzgroesse
