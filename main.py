@@ -8,16 +8,19 @@ import math
 
 class InputsService:
 
+
     def input_prefix(self):
         while True:
             response = input("\n❔Which Prefix do you want? (8/16/24): ").lower().strip()
-            if response in ('8'):
+            if response == '8':
                 print("\n❌not Implemented")
-            if response in ('16'):
+            if response == '16':
                 print("\n❌not Implemented")
-            if response in ('24'):
+            if response == '24':
                 basicnetwork, subnetwork, netzgroesse, hostanzahl, subnetzmaske = self.input_Prefix24()
                 return basicnetwork, subnetwork, netzgroesse, hostanzahl, subnetzmaske
+            else:
+                print("\nPlease enter '8' or '16' or '24'.")
 
     def input_Prefix24(self):
 
