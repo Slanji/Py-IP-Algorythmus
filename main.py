@@ -1,5 +1,6 @@
 import math
 from operator import truediv
+from os import WCONTINUED
 from symtable import Class
 from tokenize import String
 
@@ -24,6 +25,7 @@ class InputsService:
 
     def input_Prefix24(self):
         max24: int = 128
+        Valid: bool = True
 
         while True:
             response = input("\n❔(/24) Do you want to set the IP your self?  (y/n): ").lower().strip()
@@ -37,12 +39,29 @@ class InputsService:
                 print("🔄Please enter 'y' or 'n'")
 
         while True:
+            Valid = False
             try:
                 subnetwork = int(input("❔How many Networks should be created: "))
-                if subnetwork > max24:
+                if subnetwork > 64:
+                    response = input(
+                        "⚠️ The max is 64 if you want at least 1 Host per Network. Do you still want to continue? (y/n):")
+                    while True:
+                        if response in ('y', 'yes'):
+                            Valid = False
+                            break
+                        elif response in ('n', 'no'):
+                            Valid = True
+                            break
+                        else:
+                            print("🔄Please enter 'y' or 'n'")
+                if Valid:
+                    continue
+                elif subnetwork > max24:
                     print("\nThe max is 128.")
                     continue
-                break
+                else:
+                    break
+
             except ValueError:
                 print("\nPlease enter a number between 0 and 255.")
 
@@ -62,20 +81,19 @@ class OutputsService:
             print("\n⚠️ There are 0 Host possible.")
 
 
-
 class Calculator:
     def calculate24(self, subnetwork: int):
         # 1. Nächsthöhere 2er-Potenz aus der Anzahl der benötigten Subnetze
 
-        #new
-        #subnetwork = subnetwork - 2
+        # new
+        # subnetwork = subnetwork - 2
 
-        #old
+        # old
         bit = math.ceil(math.log2(subnetwork))
 
         # 2. Anzahl möglicher Hosts je Netz (Netzgröße minus Netz- und Broadcast-Adresse)
         netzgroesse = 2 ** (8 - bit)
-        hostanzahl = netzgroesse -2
+        hostanzahl = netzgroesse - 2
 
         # 3. Neue Subnetzmaske aus den genutzten Bits
         letztes_oktett_maske = 256 - netzgroesse
