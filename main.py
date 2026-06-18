@@ -1,92 +1,106 @@
 import math
 from operator import truediv
+from symtable import Class
+from tokenize import String
 
-basenetwork = 0
-subnetwork = 0
-hostanzahl = 0
-hostnumbers = 0
-basicnetwork = 0
+import math
 
 
-class Inputs:
+class InputsService:
 
-    def IP_Calculator(basicnetwork):
+    def input_prefix(self):
         while True:
-            subnetwork = int(input("\nHow many Subnetworks do you want? "))
-            hostnumbers = int(input("\nHow many Hosts do you want? "))
-            bit = math.ceil(math.log2(hostnumbers))
-            hostanzahl = 2 ** bit
-            netze = 256 / subnetwork
-            total = 0
+            response = input("\n❔Which Prefix do you want? (8/16/24): ").lower().strip()
+            if response in ('8'):
+                print("\n❌not Implemented")
+            if response in ('16'):
+                print("\n❌not Implemented")
+            if response in ('24'):
+                basicnetwork, subnetwork, netzgroesse, hostanzahl, subnetzmaske = self.input_Prefix24()
+                return basicnetwork, subnetwork, netzgroesse, hostanzahl, subnetzmaske
 
-            for count in range(subnetwork):
-                total += hostanzahl
-                parts = basicnetwork.split('.')
-                parts[3] = f'{total}'
-                new_ip = '.'.join(parts)
+    def input_Prefix24(self):
 
-                if total > 256:
-                    print(f"Error: Maximum IP's reached")
-                    break
-                elif hostanzahl > netze:
-                    print("Error: To many subnetworks and not enough IPs")
-                    break
-                else:
-                    print(f"Given IPs: {new_ip}")
+        while True:
+            response = input("\n❔(/24) Do you want to set the IP your self?  (y/n): ").lower().strip()
+            if response in ('y', 'yes'):
+                basicnetwork = input("❔(/24) Please put in a Basicnetwork: ").strip()
+                break
+            elif response in ('n', 'no'):
+                basicnetwork = "192.168.4.0"
+                break
+            else:
+                response in ("🔄Please enter 'y' or 'n'")
+
+        subnetwork = int(input("❔How many Networks should be created: "))
+
+        self.calculator = Calculator()
+
+        netzgroesse, hostanzahl, subnetzmaske = self.calculator.calculate24(subnetwork)
+        return basicnetwork, subnetwork, netzgroesse, hostanzahl, subnetzmaske
+
+
+class OutputsService:
+    def output_console(self, hostanzahl, subnetzmaske, netzadressen):
+        print(f"\n✅Max {hostanzahl} Hosts per Network possible.")
+        print(f"✅New Subnetmasks: {subnetzmaske}")
+        for index, adresse in enumerate(netzadressen, start=1):
+            print(f"\n{index}. Network: {adresse}")
+
+
+class Calculator:
+    def calculate24(self, subnetwork: int):
+        # 1. Nächsthöhere 2er-Potenz aus der Anzahl der benötigten Subnetze
+        bit = math.ceil(math.log2(subnetwork))
+
+        # 2. Anzahl möglicher Hosts je Netz (Netzgröße minus Netz- und Broadcast-Adresse)
+        netzgroesse = 2 ** (8 - bit)
+        hostanzahl = netzgroesse - 2
+
+        # 3. Neue Subnetzmaske aus den genutzten Bits
+        letztes_oktett_maske = 256 - netzgroesse
+        subnetzmaske = f"255.255.255.{letztes_oktett_maske}"
+
+        return netzgroesse, hostanzahl, subnetzmaske
+
+
+class BasisnetzwerkCalculator:
+    def calculate(self, subnetwork: int, basicnetwork: str, netzgroesse: list):
+        netzadressen = []
+        for index in range(subnetwork):
+            letztes_oktett = index * netzgroesse
+            teile = basicnetwork.split('.')
+            teile[3] = str(int(letztes_oktett))
+            netzadressen.append('.'.join(teile))
+
+        return netzadressen
+
+
+class IPCalculator:
+    def __init__(self):
+        self.calculator = Calculator()
+        self.inputs_service = InputsService()
+        self.BasicCal = BasisnetzwerkCalculator()
+        self.outputs_service = OutputsService()
+
+    def calculate_ips(self):
+        while True:
+            basicnetwork, subnetwork, netzgroesse, hostanzahl, subnetzmaske = self.inputs_service.input_prefix()
+
+            netzadressen = self.BasicCal.calculate(subnetwork, basicnetwork, netzgroesse)
+            # 4. Letztes Oktett jedes Netzes aus der neuen Netzgröße berechnen
+
+            self.outputs_service.output_console(hostanzahl, subnetzmaske, netzadressen)
 
             response = input("\nDo you want to repeat it?  (y/n): ").lower().strip()
             if response in ('y', 'yes'):
                 continue
             elif response in ('n', 'no'):
-                print("\nGoodbye Version S.1.4")
+                print("\nGoodbye Version S.2.1")
                 return True
             else:
                 print("Please enter 'y' or 'n'.")
 
-    def Edit_prefix(basicnetwork):
-        #while True:
-            howmanynetworks = int(input("\nHow many networks do you want? "))
-            total = 0
-            for count in range(howmanynetworks):
-                network = 2 ** howmanynetworks
-                total += howmanynetworks
-            print(howmanynetworks)
 
-            #bit = math.ceil(math.log2())
-            #hostanzahl = 2 **
-
-
-
-    while True:
-        response = input("\nDo you want to set the IP your self?  (y/n): ").lower().strip()
-        if response in ('y', 'yes'):
-            basicnetwork = input("\nHow do you wanna call the IP? (Exempal: 192.168.4) ")
-            while True:
-                responseflase = input("\nDo you want multiply Networks?  (y/n): ").lower().strip()
-                if responseflase in ('y', 'yes'):
-
-                    print("\nFunction not implemented")
-                elif responseflase in ('n', 'no'):
-                    basicnetwork = basicnetwork + ".0"
-                    IP_Calculator(basicnetwork)
-                    break
-                else:
-                    print("Please enter 'y' or 'n'.")
-            break
-        elif response in ('n', 'no'):
-            basicnetwork = "192.168."
-            while True:
-                responseflase = input("\nDo you want multiply Networks?  (y/n): ").lower().strip()
-                if responseflase in ('y', 'yes'):
-                    print("\nFunction not implemented")
-                elif responseflase in ('n', 'no'):
-                    basicnetwork = basicnetwork + "4.0"
-                    IP_Calculator(basicnetwork)
-                    break
-                else:
-                    print("Please enter 'y' or 'n'.")
-            break
-        else:
-            print("Please enter 'y' or 'n'.")
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+if __name__ == "__main__":
+    IPCalculator().calculate_ips()
